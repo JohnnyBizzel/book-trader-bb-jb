@@ -11,11 +11,12 @@
                   <router-link to="/profile" tag="li">Profile</router-link>
               </ul>
               <a href="#" data-target="slide-out" class="sidenav-trigger" @click="showhide"><i class="material-icons">menu</i></a>
-          </div>
+          </div>          
           <ul class="right hide-on-med-and-down">
+            <li>User: {{ title }} </li>
             <router-link to="/login" active-class="active" tag="li">Login</router-link>
             <router-link to="/register" active-class="active" tag="li">Register</router-link>
-            <router-link to="/profile" active-class="active" tag="li">Profile</router-link>
+            <router-link to="/profile" active-class="active" tag="li">Profile</router-link>            
           </ul>
         </div>
       </div>
@@ -23,12 +24,13 @@
   </div>
 </template>
 <script>
-
+import firebase from 'firebase';
+  
 export default {
   name: "navigation-view",    
   data() {
     return {
-      title: "",
+      title: "x",
       items: {},
       statusMessage: "",
       showMobile: false,
@@ -37,10 +39,46 @@ export default {
       sliderShow: false
     }
   },
+  created() {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+
+        
+        this.title = 'Welcome';
+        
+        var usersRef = firebase.database().ref('users');
+
+
+        var test = usersRef.orderByChild("email").equalTo(user.email);
+            // console.log('find',test);
+
+
+        usersRef.on("value", function(snapshot) {
+
+
+           snapshot.forEach(function(childSnapshot) {
+            // console.log(childSnapshot);
+            var key = childSnapshot.key;
+            var childData = childSnapshot.val();
+             //console.log(childData.uid, user.uid)
+
+             if(childData.uid === user.uid) {
+               //console.log(childData.username);
+                // this.currentUsername = childData.username;
+             }
+          })
+        })
+      } else {
+      // No user is signed in.
+        console.log('not auth');
+      }
+    });
+  },  
   mounted() {
       // var elems = document.querySelectorAll('.sidenav');
       // console.log(elems);
       // var instances = M.Sidenav.init(elems);
+  
   },
   methods : {
     showhide: function(e) {
