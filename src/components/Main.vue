@@ -1,7 +1,5 @@
 <template>
 <div>
-  
-  
   <Nav/>    
   <div class="slider">
     <ul class="slides">

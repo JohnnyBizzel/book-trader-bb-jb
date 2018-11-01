@@ -1,7 +1,4 @@
 <template>
-<!--   <div id="app">
-    
-  </div> -->
    <div id="app">
     <v-app>
       <v-content>
