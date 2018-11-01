@@ -24,8 +24,9 @@ let store = new Vuex.Store({
   },
   mutations: {     
     authenticateUser (state, userData) {
-     state.userId = userData.uid;
-     state.jsonWebToken = userData.token;
+      state.userId = userData.uid;
+      state.jsonWebToken = userData.token;
+      state.loggedInUser = userData.loggedInUser;
     },
     saveErrors (state, error) {
      state.errors.push(error.message);
@@ -43,20 +44,32 @@ let store = new Vuex.Store({
         console.log(res.user)
         console.log(res.user.refreshToken)
         console.log(res.user.uid)
-        //nst uToken = user.getIdToken();
-        // var u = firebase.auth().currentUser;
-        // if (u) {
-        //   // User is signed in.
-        //   console.log(u)
-        // } else {
-        //   // No user is signed in.
-        //   console.log('no u')
-        // }
-        // //console.log(uToken)
+      
+        let currentUser = '';
+        var usersRef = firebase.database().ref('users');
+        var test = usersRef.orderByChild("email").equalTo(res.user.email);
+              // console.log('find',test);
+
+          usersRef.on("value", function(snapshot) {
+
+
+             snapshot.forEach(function(childSnapshot) {
+              // console.log(childSnapshot);
+              var key = childSnapshot.key;
+              var childData = childSnapshot.val();
+              console.log(childData.uid, res.user.uid)
+              if(childData.uid === res.user.uid) {
+                console.log(childData.username);
+                currentUser = childData.username;
+              }
+            })
+          })
+        
         // set logged in user
        commit('authenticateUser', {
          token: res.user.refreshToken,
-         uid: res.user.uid
+         uid: res.user.uid,
+         loggedInUser: currentUser
        })
         router.push('/profile');
         
@@ -68,6 +81,39 @@ let store = new Vuex.Store({
          });
       }) 
     },
+//     checkUserDatabase() {
+//       firebase.auth().onAuthStateChanged(function (user) {
+//         if (user) {
+//           console.log('NAV auth stage changed <--------');
+//           this.title = 'Welcome';
+
+//           var usersRef = firebase.database().ref('users');
+
+
+//           var test = usersRef.orderByChild("email").equalTo(user.email);
+//               // console.log('find',test);
+
+
+//           usersRef.on("value", function(snapshot) {
+
+
+//              snapshot.forEach(function(childSnapshot) {
+//               // console.log(childSnapshot);
+//               var key = childSnapshot.key;
+//               var childData = childSnapshot.val();
+//               console.log(childData.uid, user.uid)
+//               if(childData.uid === user.uid) {
+//                 console.log(childData.username);
+//               // this.currentUsername = childData.username;
+//               }
+//             })
+//           })
+//         } else {
+//         // No user is signed in.
+//           console.log('not auth');
+//         }
+//       });
+//     },
     logOut() {
       firebase.auth().signOut()
         // .then(() => {

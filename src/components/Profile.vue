@@ -29,42 +29,12 @@
       }
     },
     created() {
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (user) {
-        // User is signed in.
-          console.log('Profile:', user.email);
-          console.log('uid:', user.uid);     
-          var usersRef = firebase.database().ref('users');
-          
-          
-          var test = usersRef.orderByChild("email").equalTo(user.email);
-              // console.log('find',test);
-          
-          
-          usersRef.on("value", function(snapshot) {
-           
-            
-             snapshot.forEach(function(childSnapshot) {
-               console.log(childSnapshot);
-              var key = childSnapshot.key;
-              var childData = childSnapshot.val();
-               //console.log(childData.uid, user.uid)
 
-               if(childData.uid === user.uid) {
-                 //console.log(childData.username);
-                  // this.currentUsername = childData.username;
-               }
-            })
-          })
-        } else {
-        // No user is signed in.
-          console.log('not auth');
-        }
-      });
     },  
     mounted() {
       this.firebaseUser = firebase.auth().currentUser;
       this.userEmail = this.firebaseUser.email;
+      this.currentUsername = this.$store.state.loggedInUser;
 
       if (this.firebaseUser != null) {
         this.firebaseUser.providerData.forEach(function (profile) {

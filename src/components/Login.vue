@@ -56,23 +56,7 @@
           this.$store.dispatch('signIn', { email: this.email, password: this.password });
           //  await (this.$router.replace('/profile');
         }
-      
-      
-        // ,
-        // signIn() {
-        //   console.log('Sign in attempt', this.email)
-        //   firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-        //   .then(user => {
-        //     console.log(user)
-        //     // set logged in user
-        //     setUsername(user.uid)
-        //     this.$router.replace('/profile')
-        //   })
-        //   .catch(err => { 
-        //     console.log(err.message)
-        //     this.errors.push(err.message);
-        //   }) 
-        // }
+           
       } 
     }
   </script>
