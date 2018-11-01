@@ -25,6 +25,7 @@
 </template>
 <script>
 import firebase from 'firebase';
+import { mapActions } from  'vuex';
   
 export default {
   name: "navigation-view",    
@@ -40,39 +41,8 @@ export default {
     }
   },
   created() {
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
 
-        
-        this.title = 'Welcome';
-        
-        var usersRef = firebase.database().ref('users');
-
-
-        var test = usersRef.orderByChild("email").equalTo(user.email);
-            // console.log('find',test);
-
-
-        usersRef.on("value", function(snapshot) {
-
-
-           snapshot.forEach(function(childSnapshot) {
-            // console.log(childSnapshot);
-            var key = childSnapshot.key;
-            var childData = childSnapshot.val();
-             //console.log(childData.uid, user.uid)
-
-             if(childData.uid === user.uid) {
-               //console.log(childData.username);
-                // this.currentUsername = childData.username;
-             }
-          })
-        })
-      } else {
-      // No user is signed in.
-        console.log('not auth');
-      }
-    });
+   
   },  
   mounted() {
       // var elems = document.querySelectorAll('.sidenav');
@@ -80,7 +50,7 @@ export default {
       // var instances = M.Sidenav.init(elems);
   
   },
-  methods : {
+  methods : {    
     showhide: function(e) {
       console.log(e.target)
       this.showMobile = !this.showMobile;
