@@ -55,8 +55,7 @@
         signIn() {
           this.$store.dispatch('signIn', { email: this.email, password: this.password });
           //  await (this.$router.replace('/profile');
-        }
-           
+        }           
       } 
     }
   </script>
