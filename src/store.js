@@ -15,7 +15,23 @@ let store = new Vuex.Store({
   },
   getters: {
     getLoggedInUser: state => {
-     return "Welcome, " + state.loggedInUser
+      const localStore = JSON.parse(localStorage.getItem('book-trader-bb-jb-token'));
+      console.log('current local storage :: ',localStore);
+      if (localStore.token) {
+        state.jsonWebToken = localStore.token
+        state.loggedInUser = localStore.loggedInUser
+        state.userId = localStore.uid
+      }        
+     return state
+    },
+    isAuth () {
+      const localStore = JSON.parse(localStorage.getItem('book-trader-bb-jb-token'));
+      if (localStore) {
+        console.log("CURR USR ID ", localStore.loggedInUser)
+        return JSON.parse(localStorage.getItem('book-trader-bb-jb-token')).token !== null;
+      } else {
+        return false;
+      }
     },
     jwt: state => state.jsonWebToken,
     //jwtData: (state, getters) => state.jsonWebToken ? JSON.parse(atob(getters.jwt.split('.')[1])) : null,
@@ -27,6 +43,8 @@ let store = new Vuex.Store({
       state.userId = userData.uid;
       state.jsonWebToken = userData.token;
       state.loggedInUser = userData.loggedInUser;
+      console.log(JSON.stringify(userData));
+      localStorage.setItem('book-trader-bb-jb-token', JSON.stringify(userData)); 
     },
     saveErrors (state, error) {
      state.errors.push(error.message);
@@ -41,9 +59,10 @@ let store = new Vuex.Store({
       console.log('Sign in attempt', payload.email)
       firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
       .then(res => {
-        console.log(res.user)
-        console.log(res.user.refreshToken)
-        console.log(res.user.uid)
+//         console.log(res.user)
+//         console.log(res.user.refreshToken)
+        
+//         console.log(res.user.uid)
       
         let currentUser = '';
         var usersRef = firebase.database().ref('users');
@@ -57,22 +76,24 @@ let store = new Vuex.Store({
               // console.log(childSnapshot);
               var key = childSnapshot.key;
               var childData = childSnapshot.val();
-              console.log(childData.uid, res.user.uid)
+             // console.log(childData.uid, res.user.uid)
               if(childData.uid === res.user.uid) {
-                console.log(childData.username);
+                //console.log(childData.username);
                 currentUser = childData.username;
               }
             })
+            
+        // set logged in user
+            commit('authenticateUser', {
+               token: res.user.refreshToken,
+               uid: res.user.uid,
+               loggedInUser: currentUser
+            })
+            router.push('/profile');
+
           })
         
-        // set logged in user
-       commit('authenticateUser', {
-         token: res.user.refreshToken,
-         uid: res.user.uid,
-         loggedInUser: currentUser
-       })
-        router.push('/profile');
-        
+ 
       })
       .catch(err => { 
         console.log(err.message)
@@ -86,17 +107,10 @@ let store = new Vuex.Store({
 //         if (user) {
 //           console.log('NAV auth stage changed <--------');
 //           this.title = 'Welcome';
-
 //           var usersRef = firebase.database().ref('users');
-
-
 //           var test = usersRef.orderByChild("email").equalTo(user.email);
 //               // console.log('find',test);
-
-
 //           usersRef.on("value", function(snapshot) {
-
-
 //              snapshot.forEach(function(childSnapshot) {
 //               // console.log(childSnapshot);
 //               var key = childSnapshot.key;
@@ -116,9 +130,10 @@ let store = new Vuex.Store({
 //     },
     logOut() {
       firebase.auth().signOut()
-        // .then(() => {
-        //   this.$router.replace('login')
-      //})
+      localStorage.setItem('book-trader-bb-jb-token', null);
+      // this.state.userId = null;
+      // this.jsonWebToken = null;
+      // this.loggedInUser = null;
     }
   }
    

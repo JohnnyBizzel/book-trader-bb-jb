@@ -8,6 +8,7 @@
     Welcome, {{ currentUsername }}
     <br/>
     Your email: {{ userEmail }}
+    {{ count }}
   </p>
 </div>
 </template>
@@ -25,7 +26,8 @@
       return {        
         firebaseUser: null,
         userEmail: null,
-        currentUsername: ''
+        currentUsername: '',
+        count: 0
       }
     },
     created() {
@@ -35,7 +37,8 @@
       this.firebaseUser = firebase.auth().currentUser;
       this.userEmail = this.firebaseUser.email;
       this.currentUsername = this.$store.state.loggedInUser;
-
+      this.count = this.count +1;
+      
       if (this.firebaseUser != null) {
         this.firebaseUser.providerData.forEach(function (profile) {
           console.log("Sign-in provider: " + profile.providerId);
@@ -46,22 +49,22 @@
         });
       }
       
-      var currentUser = this.firebaseUser;
-      var usersRef = firebase.database().ref('users');
+//       var currentUser = this.firebaseUser;
+//       var usersRef = firebase.database().ref('users');
 
-      usersRef.on("value", function(snapshot, currentUser) {
-        console.log(currentUser);
-         snapshot.forEach(function(childSnapshot) {
-          var key = childSnapshot.key;
-          var childData = childSnapshot.val();
-           //console.log("Mounted", childData.uid, currentUser.uid)
+//       usersRef.on("value", function(snapshot, currentUser) {
+//         console.log(currentUser);
+//          snapshot.forEach(function(childSnapshot) {
+//           var key = childSnapshot.key;
+//           var childData = childSnapshot.val();
+//            //console.log("Mounted", childData.uid, currentUser.uid)
 
-           // if(childData.uid === currentUser.uid) {
-           //   console.log(childData.username);
-           //    // this.currentUsername = childData.username;
-           // }
-        })
-      })
+//            // if(childData.uid === currentUser.uid) {
+//            //   console.log(childData.username);
+//            //    // this.currentUsername = childData.username;
+//            // }
+//         })
+//       })
       
     },
     methods: {

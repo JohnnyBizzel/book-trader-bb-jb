@@ -14,6 +14,8 @@
           </div>          
           <ul class="right hide-on-med-and-down">
             <li>User: {{ title }} </li>
+            <li v-if="auth">Auth</li>
+            <li v-if="!auth">----</li>
             <router-link to="/login" active-class="active" tag="li">Login</router-link>
             <router-link to="/register" active-class="active" tag="li">Register</router-link>
             <router-link to="/profile" active-class="active" tag="li">Profile</router-link>            
@@ -63,6 +65,9 @@ export default {
         'slider-hide': !this.showMobile,
         'slider-show': this.showMobile
       }
+    },
+    auth () {
+      return this.$store.getters.isAuth
     }
   }
 }
