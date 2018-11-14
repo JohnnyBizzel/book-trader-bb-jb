@@ -7,18 +7,27 @@ import router from "./router";
 import VueResource from "vue-resource";
 import firebase from "firebase";
 import store from './store.js';
-import Vuetify from 'vuetify'
+import Vuetify from 'vuetify';
+//import DotEnv from 'dotenv';
+// import axios from 'axios';
+// import VueAxios from 'vue-axios';
  
 Vue.use(Vuetify)
 
 Vue.use(VueResource);
 
+// Vue.use(VueAxios, axios);
+//DotEnv.load();
+
 Vue.config.productionTip = false;
 
-const firebaseApi = process.env.FIREBASE_KEY;
+const firebaseApi = process.env.VUE_APP_FBAPI;
+const bookReadsApi = process.env.VUE_APP_BOOK_READS_API;
+
+//Vue.use({ bookReadsApiKey : bookReadsApi });
 let app;
 var config = {
-  apiKey: 'AIzaSyBhZPM23j7e-g3pqqrdnWSwry3zbzi4B5M',
+  apiKey: firebaseApi,
   authDomain: "book-trader-96e8a.firebaseapp.com",
   databaseURL: "https://book-trader-96e8a.firebaseio.com",
   projectId: "book-trader-96e8a",

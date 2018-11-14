@@ -65,7 +65,8 @@
 
 <script>
   import Nav from './Nav';
-  import firebase from "firebase";
+  import { mapActions } from  'vuex';
+
   export default {
     components: {
       Nav
@@ -84,44 +85,10 @@
       }
     },
     methods: {
+      ...mapActions(['register']),
       submit(e) {
         e.preventDefault()
-        console.log('store counter:: ',this.$store.state.count)
-        const username = this.credentials.username
-        const email = this.credentials.email
-        const password = this.credentials.password
-        const city = this.credentials.city
-        const tradeByPost = this.credentials.tradeByPost
-        const tradeInPerson = this.credentials.tradeInPerson
-        
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then((user) => {
-
-          var userRef = firebase.database().ref("users");
-          console.log(userRef);
-          userRef.push({ uid : user.user.uid,
-             username,
-             email,
-             city,
-             tradeByPost,
-             tradeInPerson });
-          // move to profile if successful?
-          this.$router.replace('profile');
-        }, (err) => {
-          console.log(err)
-          this.errors.push(err.message);
-        })    
-     
-        
-        let credentials = {
-          email: this.credentials.email,
-          password: this.credentials.password,
-          username: this.credentials.username,
-          city: this.credentials.city,
-          tradeByPost: this.credentials.tradeByPost,
-          tradeInPerson: this.credentials.tradeInPerson
-        }
-        //console.log(credentials)
+        this.$store.dispatch('register', this.credentials);
       },
       checkForm: function (e) {
         console.log('checking form');

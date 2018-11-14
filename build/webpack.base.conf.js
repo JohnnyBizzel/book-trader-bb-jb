@@ -3,11 +3,13 @@ const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
+const webpack = require('webpack')
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
 
+console.log('Base', process.env.FIREBASE_KEY);
 
 
 module.exports = {
@@ -67,6 +69,14 @@ module.exports = {
       }
     ]
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        VUE_APP_FBAPI: JSON.stringify(process.env.FIREBASE_KEY),
+        VUE_APP_BOOK_READS_API: JSON.stringify(process.env.BOOK_READS_API),
+      },
+    }),
+  ],
   node: {
     // prevent webpack from injecting useless setImmediate polyfill because Vue
     // source contains it (although only uses it if it's native).
@@ -79,4 +89,5 @@ module.exports = {
     tls: 'empty',
     child_process: 'empty'
   }
+
 }

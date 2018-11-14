@@ -55,6 +55,31 @@ let store = new Vuex.Store({
     }
   },
   actions: {
+    register({commit}, payload) {
+      firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
+        .then((res) => {
+
+          var userRef = firebase.database().ref("users");
+          console.log(userRef);
+          userRef.push({ uid : res.user.uid,
+             username: payload.username,
+             email: payload.email,
+             city: payload.city,
+             tradeByPost: payload.tradeByPost,
+             tradeInPerson: payload.tradeInPerson });
+          // move to profile if successful?
+         commit('authenticateUser', {
+           token: res.user.refreshToken,
+           uid: res.user.uid,
+           loggedInUser: payload.username
+        })
+            router.push('/profile');
+        }, (err) => {
+          console.log(err)
+          this.errors.push(err.message);
+        })    
+       
+    },
     signIn ({commit}, payload) {
       console.log('Sign in attempt', payload.email)
       firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
