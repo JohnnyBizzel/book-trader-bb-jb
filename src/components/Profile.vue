@@ -3,20 +3,192 @@
 <div>
     <Nav/>
     Profile
-    <button @click="logout">Logout</button>
+<!--     <button @click="logout">Logout</button> -->
+  <button @click="getOneBook">Get 1 book</button>
   <p>
     Welcome, {{ currentUsername }}
     <br/>
     Your email: {{ userEmail }}
     {{ count }}
   </p>
+  <div class="row">
+  <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://is1-ssl.mzstatic.com/image/thumb/Music22/v4/79/24/b7/7924b77e-1213-8397-32da-94d10f524a8d/mzm.smrcmzqm.jpg/200x0w.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://is4-ssl.mzstatic.com/image/thumb/Music/y2005/m09/d29/h10/mzi.glspqfwy.jpg/200x0w.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://i.pinimg.com/originals/85/43/9b/85439be9ef48b51023bd029ed182238e.jpg">
+      </div>
+      <div class="card-content">
+        <p class="text-darken-2">Author: Kurt Vonnegut</p>
+        <p class="text-darken-2">Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://s2982.pcdn.co/wp-content/uploads/2018/08/CrossHerHeart_Cover.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://lr-assets.storage.googleapis.com/main/covers/cwh/1537866012-the-mystery-of-three-quarters-audiobooks-200x200.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+  <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/1/15/The_dinner_party_book_cover.jpg/200px-The_dinner_party_book_cover.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+    <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" v-bind:src="oneBook.image_url">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut!!!!!</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+    <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/1/15/The_dinner_party_book_cover.jpg/200px-The_dinner_party_book_cover.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+    <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/1/15/The_dinner_party_book_cover.jpg/200px-The_dinner_party_book_cover.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+    <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/1/15/The_dinner_party_book_cover.jpg/200px-The_dinner_party_book_cover.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+    <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/1/15/The_dinner_party_book_cover.jpg/200px-The_dinner_party_book_cover.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+    <div class="col s12 m4 l2">
+    <div class="card">
+      <div class="card-image">
+        <img class="responsive-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/1/15/The_dinner_party_book_cover.jpg/200px-The_dinner_party_book_cover.jpg">
+      </div>
+      <div class="card-content">
+        <p>Author: Kurt Vonnegut</p>
+        <p>Owner: Brian Borin</p>
+      </div>
+      <div class="card-action">
+        <a class="blue-text text-lighten-2" href="#">Request</a>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 </template>
 
 <script>
   import Nav from './Nav';
   import firebase from 'firebase';
-  
+  import axios from 'axios';
+      
   export default {
     name: 'profile-view',
     components: {
@@ -27,16 +199,21 @@
         firebaseUser: null,
         userEmail: null,
         currentUsername: '',
-        count: 0
+        count: 0,
+        someBook: null,
+        someBookImageLink: ''
       }
     },
     created() {
-
+      
     },  
     mounted() {
       this.firebaseUser = firebase.auth().currentUser;
       this.userEmail = this.firebaseUser.email;
       this.currentUsername = this.$store.state.loggedInUser;
+      //this.someBook = this.$store.state.book;
+      //console.log('Image URL', this.someBook.image_url);
+      //if (this.someBook) this.someBookImageLink = this.someBook.image_url
       this.count = this.count +1;
       
       if (this.firebaseUser != null) {
@@ -48,32 +225,22 @@
           console.log("  Photo URL: " + profile.photoURL);
         });
       }
-      
-//       var currentUser = this.firebaseUser;
-//       var usersRef = firebase.database().ref('users');
-
-//       usersRef.on("value", function(snapshot, currentUser) {
-//         console.log(currentUser);
-//          snapshot.forEach(function(childSnapshot) {
-//           var key = childSnapshot.key;
-//           var childData = childSnapshot.val();
-//            //console.log("Mounted", childData.uid, currentUser.uid)
-
-//            // if(childData.uid === currentUser.uid) {
-//            //   console.log(childData.username);
-//            //    // this.currentUsername = childData.username;
-//            // }
-//         })
-//       })
-      
     },
     methods: {
-      logout() {
-        this.$store.dispatch('logOut')
-        // firebase.auth().signOut()
-        .then(() => {
-        this.$router.replace('login')
-        })
+      // logout() {
+      //   this.$store.dispatch('logOut')
+      //   // firebase.auth().signOut()
+      //   .then(() => {
+      //   this.$router.replace('login')
+      //   })
+      // },
+      getOneBook() {
+        this.$store.dispatch('getBookById', 38355410)        
+      }
+    },
+    computed: {
+      oneBook() {
+        return this.$store.state.book || ''
       }
     }
   }

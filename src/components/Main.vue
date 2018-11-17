@@ -234,11 +234,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   
-  .callouts {
-    padding-top: 2rem;
-  }
+.callouts {
+  padding-top: 2rem;
+}
   
-  .section-search input {
+.section-search input {
   padding: 5px !important;
   font-size: 18px !important;
   width: 90% !important;

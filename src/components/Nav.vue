@@ -13,12 +13,12 @@
               <a href="#" data-target="slide-out" class="sidenav-trigger" @click="showhide"><i class="material-icons">menu</i></a>
           </div>          
           <ul class="right hide-on-med-and-down">
-            <li>User: {{ title }} </li>
-            <li v-if="auth">Auth</li>
+            <li>User: {{ username }} </li>
+            <li v-if="auth"><span @click="logout">Logout</span></li>
             <li v-if="!auth">----</li>
-            <router-link to="/login" active-class="active" tag="li">Login</router-link>
-            <router-link to="/register" active-class="active" tag="li">Register</router-link>
-            <router-link to="/profile" active-class="active" tag="li">Profile</router-link>            
+            <router-link v-if="!auth" to="/login" active-class="active" tag="li">Login</router-link>
+            <router-link v-if="!auth" to="/register" active-class="active" tag="li">Register</router-link>
+            <router-link v-if="auth"  to="/profile" active-class="active" tag="li">Profile</router-link>            
           </ul>
         </div>
       </div>
@@ -56,6 +56,13 @@ export default {
     showhide: function(e) {
       console.log(e.target)
       this.showMobile = !this.showMobile;
+    },
+    logout() {
+      this.$store.dispatch('logOut')
+      // firebase.auth().signOut()
+      .then(() => {
+      this.$router.replace('login')
+      })
     }
   },
   computed: {
@@ -67,7 +74,12 @@ export default {
       }
     },
     auth () {
-      return this.$store.getters.isAuth
+      const user = this.$store.getters.getLoggedInUser
+      return user.jsonWebToken || false
+    },
+    username () {
+      const user = this.$store.getters.getLoggedInUser
+      return !user ? '' : user.loggedInUser
     }
   }
 }

@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import firebase from 'firebase';
 import router from './router';
+import axios from 'axios';
 
 Vue.use(Vuex);
 
@@ -11,18 +12,22 @@ let store = new Vuex.Store({
     jsonWebToken: null,
     errors: [],
     loggedInUser: null,
-    count: 1
+    count: 1,
+    book: null
   },
   getters: {
     getLoggedInUser: state => {
-      const localStore = JSON.parse(localStorage.getItem('book-trader-bb-jb-token'));
-      console.log('current local storage :: ',localStore);
-      if (localStore.token) {
+      const localStore = JSON.parse(localStorage.getItem('book-trader-bb-jb-token'));    
+      console.log(localStore);
+      if (localStore) {
         state.jsonWebToken = localStore.token
         state.loggedInUser = localStore.loggedInUser
         state.userId = localStore.uid
       }        
-     return state
+      return state
+    },
+    getBook: state => {
+      state.book
     },
     isAuth () {
       const localStore = JSON.parse(localStorage.getItem('book-trader-bb-jb-token'));
@@ -42,9 +47,14 @@ let store = new Vuex.Store({
     authenticateUser (state, userData) {
       state.userId = userData.uid;
       state.jsonWebToken = userData.token;
-      state.loggedInUser = userData.loggedInUser;
-      console.log(JSON.stringify(userData));
+      state.loggedInUser = userData.loggedInUser;      
       localStorage.setItem('book-trader-bb-jb-token', JSON.stringify(userData)); 
+    },
+    unAuthenticateUser (state) {
+      state.userId = null;
+      state.jsonWebToken = null;
+      state.loggedInUser = null;      
+      localStorage.setItem('book-trader-bb-jb-token', null);
     },
     saveErrors (state, error) {
      state.errors.push(error.message);
@@ -52,28 +62,50 @@ let store = new Vuex.Store({
     setJWT(state, jwt) {
       // When this updates, the getters and anything bound to them updates as well.
       state.jsonWebToken = jwt;
+    },
+    setBook (state, book) {
+      state.book = book;
     }
   },
   actions: {
+    register({commit}, payload) {
+      firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
+        .then((res) => {
+
+          var userRef = firebase.database().ref("users");
+          console.log(userRef);
+          userRef.push({ uid : res.user.uid,
+             username: payload.username,
+             email: payload.email,
+             city: payload.city,
+             tradeByPost: payload.tradeByPost,
+             tradeInPerson: payload.tradeInPerson });
+          // move to profile if successful?
+         commit('authenticateUser', {
+           token: res.user.refreshToken,
+           uid: res.user.uid,
+           loggedInUser: payload.username
+        })
+            router.push('/profile');
+        }, (err) => {
+          console.log(err)
+          this.errors.push(err.message);
+        })    
+       
+    },
     signIn ({commit}, payload) {
       console.log('Sign in attempt', payload.email)
       firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
       .then(res => {
-//         console.log(res.user)
-//         console.log(res.user.refreshToken)
-        
-//         console.log(res.user.uid)
-      
+
         let currentUser = '';
         var usersRef = firebase.database().ref('users');
         var test = usersRef.orderByChild("email").equalTo(res.user.email);
               // console.log('find',test);
 
           usersRef.on("value", function(snapshot) {
+            snapshot.forEach(function(childSnapshot) {
 
-
-             snapshot.forEach(function(childSnapshot) {
-              // console.log(childSnapshot);
               var key = childSnapshot.key;
               var childData = childSnapshot.val();
              // console.log(childData.uid, res.user.uid)
@@ -83,7 +115,7 @@ let store = new Vuex.Store({
               }
             })
             
-        // set logged in user
+          // set logged in user
             commit('authenticateUser', {
                token: res.user.refreshToken,
                uid: res.user.uid,
@@ -92,7 +124,6 @@ let store = new Vuex.Store({
             router.push('/profile');
 
           })
-        
  
       })
       .catch(err => { 
@@ -102,41 +133,30 @@ let store = new Vuex.Store({
          });
       }) 
     },
-//     checkUserDatabase() {
-//       firebase.auth().onAuthStateChanged(function (user) {
-//         if (user) {
-//           console.log('NAV auth stage changed <--------');
-//           this.title = 'Welcome';
-//           var usersRef = firebase.database().ref('users');
-//           var test = usersRef.orderByChild("email").equalTo(user.email);
-//               // console.log('find',test);
-//           usersRef.on("value", function(snapshot) {
-//              snapshot.forEach(function(childSnapshot) {
-//               // console.log(childSnapshot);
-//               var key = childSnapshot.key;
-//               var childData = childSnapshot.val();
-//               console.log(childData.uid, user.uid)
-//               if(childData.uid === user.uid) {
-//                 console.log(childData.username);
-//               // this.currentUsername = childData.username;
-//               }
-//             })
-//           })
-//         } else {
-//         // No user is signed in.
-//           console.log('not auth');
-//         }
-//       });
-//     },
-    logOut() {
+    logOut({commit}) {
       firebase.auth().signOut()
-      localStorage.setItem('book-trader-bb-jb-token', null);
-      // this.state.userId = null;
-      // this.jsonWebToken = null;
-      // this.loggedInUser = null;
+      commit('unAuthenticateUser')
+      //localStorage.setItem('book-trader-bb-jb-token', null);
+    },
+    // API calls
+    getBookById({commit}, bookId) {
+      const xml2js = require('xml2js'); // XML to JSON
+      const parser = xml2js.Parser({explicitArray: false});
+      const apiKey = process.env.VUE_APP_BOOK_READS_API;
+      const api = `https://cors-anywhere.herokuapp.com/https://www.goodreads.com/book/show/${bookId}?format=xml&key=${apiKey}`
+      axios.get(api).then((response) => {
+        //console.log(response.data)
+        parser.parseString(response.data,
+          function(err, result) {
+              if (err) console.log(err);
+              console.log(result.GoodreadsResponse.book);
+              // cb(null, result.GoodreadsResponse.book);
+              // call the mutation to set the book object (in state)
+              commit('setBook', result.GoodreadsResponse.book)
+          });
+      })
     }
   }
-   
 })
  
 export default store;
