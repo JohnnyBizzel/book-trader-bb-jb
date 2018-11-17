@@ -8,7 +8,7 @@ import VueResource from "vue-resource";
 import firebase from "firebase";
 import store from './store.js';
 import Vuetify from 'vuetify';
-//import DotEnv from 'dotenv';
+import DotEnv from 'dotenv';
 // import axios from 'axios';
 // import VueAxios from 'vue-axios';
  

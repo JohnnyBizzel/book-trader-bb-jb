@@ -3,7 +3,8 @@
 <div>
     <Nav/>
     Profile
-    <button @click="logout">Logout</button>
+<!--     <button @click="logout">Logout</button> -->
+  <button @click="getOneBook">Get 1 book</button>
   <p>
     Welcome, {{ currentUsername }}
     <br/>
@@ -98,10 +99,10 @@
     <div class="col s12 m4 l2">
     <div class="card">
       <div class="card-image">
-        <img class="responsive-img" src="https://upload.wikimedia.org/wikipedia/en/thumb/1/15/The_dinner_party_book_cover.jpg/200px-The_dinner_party_book_cover.jpg">
+        <img class="responsive-img" v-bind:src="oneBook.image_url">
       </div>
       <div class="card-content">
-        <p>Author: Kurt Vonnegut</p>
+        <p>Author: Kurt Vonnegut!!!!!</p>
         <p>Owner: Brian Borin</p>
       </div>
       <div class="card-action">
@@ -187,8 +188,7 @@
   import Nav from './Nav';
   import firebase from 'firebase';
   import axios from 'axios';
-  
-  
+      
   export default {
     name: 'profile-view',
     components: {
@@ -199,25 +199,21 @@
         firebaseUser: null,
         userEmail: null,
         currentUsername: '',
-        count: 0
+        count: 0,
+        someBook: null,
+        someBookImageLink: ''
       }
     },
     created() {
       
-      const apiKey = process.env.VUE_APP_BOOK_READS_API;
-      const api = `https://cors-anywhere.herokuapp.com/https://www.goodreads.com/book/show/135479?format=xml&key=${apiKey}`
-      axios.get(api).then((response) => {
-        console.log(response.data)
-      })
-
-
     },  
     mounted() {
-      
-      
       this.firebaseUser = firebase.auth().currentUser;
       this.userEmail = this.firebaseUser.email;
       this.currentUsername = this.$store.state.loggedInUser;
+      //this.someBook = this.$store.state.book;
+      //console.log('Image URL', this.someBook.image_url);
+      //if (this.someBook) this.someBookImageLink = this.someBook.image_url
       this.count = this.count +1;
       
       if (this.firebaseUser != null) {
@@ -231,12 +227,20 @@
       }
     },
     methods: {
-      logout() {
-        this.$store.dispatch('logOut')
-        // firebase.auth().signOut()
-        .then(() => {
-        this.$router.replace('login')
-        })
+      // logout() {
+      //   this.$store.dispatch('logOut')
+      //   // firebase.auth().signOut()
+      //   .then(() => {
+      //   this.$router.replace('login')
+      //   })
+      // },
+      getOneBook() {
+        this.$store.dispatch('getBookById', 38355410)        
+      }
+    },
+    computed: {
+      oneBook() {
+        return this.$store.state.book || ''
       }
     }
   }
