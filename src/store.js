@@ -13,7 +13,8 @@ let store = new Vuex.Store({
     errors: [],
     loggedInUser: null,
     count: 1,
-    book: null
+    book: null,
+    books: []
   },
   getters: {
     getLoggedInUser: state => {
@@ -28,6 +29,9 @@ let store = new Vuex.Store({
     },
     getBook: state => {
       state.book
+    },
+    getBooks: state => {
+      state.books
     },
     isAuth () {
       const localStore = JSON.parse(localStorage.getItem('book-trader-bb-jb-token'));
@@ -65,6 +69,9 @@ let store = new Vuex.Store({
     },
     setBook (state, book) {
       state.book = book;
+    },
+    setBooks (state, books) {
+      state.books = books;
     }
   },
   actions: {
@@ -155,6 +162,36 @@ let store = new Vuex.Store({
               commit('setBook', result.GoodreadsResponse.book)
           });
       })
+    },
+    searchBooks({commit}, searchTerm) {
+      // https://www.goodreads.com/search/index.xml  
+      const xml2js = require('xml2js'); // XML to JSON
+      const parser = xml2js.Parser({explicitArray: false});
+      const apiKey = process.env.VUE_APP_BOOK_READS_API;
+      const api = `https://cors-anywhere.herokuapp.com/https://www.goodreads.com/search/index.xml?format=xml&key=${apiKey}&q=${searchTerm}`
+      axios.get(api).then((response) => {
+        //console.log(response.data)
+        parser.parseString(response.data,
+          function(err, result) {
+              if (err) console.log(err);
+              console.log(result.GoodreadsResponse.search.results.work);  
+              if (result.GoodreadsResponse.search.results.work)
+                commit('setBooks', result.GoodreadsResponse.search.results.work);
+              // call the mutation to set the book object (in state)
+              // commit('setBook', result.GoodreadsResponse.book)
+          });
+      })
+    },
+    saveBook({commit}, book) {
+      // save a book to my books collection
+    },
+    getmyBooks({commit}) {
+      // get all my books available to trade
+    },
+    getOtherUserBooks({commit}, userId) {
+      // show all available books for trade minus my books
+    },
+    showTrades() {
     }
   }
 })
