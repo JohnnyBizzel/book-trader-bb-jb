@@ -13,9 +13,8 @@
               <a href="#" data-target="slide-out" class="sidenav-trigger" @click="showhide"><i class="material-icons">menu</i></a>
           </div>          
           <ul class="right hide-on-med-and-down">
-            <li>User: {{ username }} </li>
+            <li class="welcome" v-if="auth">Welcome, {{ username }} </li>
             <li v-if="auth"><span @click="logout">Logout</span></li>
-            <li v-if="!auth">----</li>
             <router-link v-if="!auth" to="/login" active-class="active" tag="li">Login</router-link>
             <router-link v-if="!auth" to="/register" active-class="active" tag="li">Register</router-link>
             <router-link v-if="auth"  to="/profile" active-class="active" tag="li">Profile</router-link>            
@@ -89,6 +88,9 @@ export default {
     padding: 0 15px; }
   li:hover {
     cursor: pointer;
+  }
+  li.welcome:hover {
+    cursor: default;
   }
   .slider-hide {
     position: absolute;
