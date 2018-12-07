@@ -9,10 +9,9 @@
       </header>
       
       <div class="flexbox-container">
-          <div class="card" v-for="b in allBooks">        
+          <div class="card brown lighten-5" v-for="b in allBooks">        
             <div class="card-image">
               <img class="fixed-height" v-bind:src="b.photoURL">
-<!--               <span class="card-title black-text">{ b.bookTitle }</span>               -->
               <span v-if="!b.alreadyRequested">
               <a class="btn-floating halfway-fab waves-effect waves-light green">
                 <i @click="reqBook(b)" class="material-icons">send</i>
@@ -20,21 +19,27 @@
               </span>
               <span v-if="b.alreadyRequested">
                 <a class="btn-floating disabled halfway-fab waves-effect waves-light green">
-                  <i class="material-icons">send</i>
+                  <i class="material-icons">check</i>
                 </a>
               </span>
               
             </div>
             <div class="card-content">
-              <p><span v-if="!b.alreadyRequested" class="blue-text text-lighten-2 cursor-pointer left" @click="reqBook(b)">Request book</span></p>
-              <h6 class="activator grey-text text-darken-4">{{ b.bookTitle }}<i class="material-icons right">more_vert</i></h6>
+              <p class="activator grey-text text-darken-4">
+              <span class="size120pct">{{ b.bookTitle }}</span>
+                <br/>
+                <a href="#" v-if="!b.alreadyRequested" class="blue-text text-lighten-2 cursor-pointer right padding-bottom" @click="reqBook(b)">Request book</a>   
+              </p>
             </div>
+            <div class="card-action brown lighten-2 activator">
+              <a class="white-text" href="#">More Details</a>
+            </div>  
             <div class="card-reveal">
               <span class="card-title grey-text text-darken-4">{{ b.bookTitle }}<i class="material-icons right">close</i></span>
               <p>by {{ b.authorName }}</p>
               <p>Owner: {{ b.ownerId }}</p>
               <a v-bind:href="'https://www.goodreads.com/book/show/' + b.bookId" target="_blank">More details on Good Reads</a>
-            </div>            
+            </div>   
         </div> 
       </div>  
       
@@ -99,6 +104,11 @@
   span.cursor-pointer:hover {
     cursor: pointer;
   }
+  .card-action {
+    position: absolute !important;
+    width: 100%;
+    bottom: 0;
+  }
  .card { 
     width: 13em;
   }
@@ -115,5 +125,18 @@
     border: 1px solid silver;
   } i {
     cursor: pointer;
+  }
+  .grey-text.text-darken-4 {
+    text-align: center;
+    margin-bottom: 3em;
+  }
+  h5 {
+    font-weight: 300;
+  }
+  .size120pct {
+    font-size: 120%;
+  }
+  .padding-bottom {
+    padding-bottom: 10px;
   }
 </style>

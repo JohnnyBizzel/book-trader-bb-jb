@@ -141,7 +141,7 @@ let store = new Vuex.Store({
 
         let currentUser = '';
         var usersRef = firebase.database().ref('users');
-        var test = usersRef.orderByChild("email").equalTo(res.user.email);
+        //var test = usersRef.orderByChild("email").equalTo(res.user.email);
              
           usersRef.on("value", function(snapshot) {
             snapshot.forEach(function(childSnapshot) {
@@ -272,7 +272,7 @@ let store = new Vuex.Store({
     },
     getOtherUserBooks({commit}) {
       // show all available books for trade minus my books
-      console.log(this.state.tradeOutbox)
+      let outBox = this.state.tradeOutbox;
       const bookRef = firebase.database().ref('books');
       let otherBooks = [];
       const currentUserId = this.state.userId;
@@ -284,12 +284,34 @@ let store = new Vuex.Store({
           if (currentUserId !== userId) {
             let obj = child.val()[userId]
             obj.ownerId = userId
-            obj.alreadyRequested = true
-            // TODO do a test to find if this book has been requested by this user!
+            obj.alreadyRequested = false
+            // do a test to find if this book has been requested by this user!
+            const tradeRef = firebase.database().ref('trades');
+            let tradeArray = [];
+            tradeRef.once('value')
+              .then(function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                  const child = childSnapshot.val();
+                  //console.log(child);
+                  if (child.bookOwner !== currentUserId 
+                      && child.requestorsUserId === currentUserId) {
+                    tradeArray.push(childSnapshot.val())
+                    console.log(obj.bookId);
+                    console.log(child.bookId);
+                    if (child.bookId === obj.bookId) {
+                      console.log('Found MATCH');
+                      obj.alreadyRequested = true
+                    }
+                  }
+              })
+              console.log(tradeArray)
+            })
             // obj.alreadyRequested = t/f
             otherBooks.push(obj)             
           }
         })
+        console.log(outBox)
+
         return commit('setOtherUserBooks', otherBooks)  
 
       })
