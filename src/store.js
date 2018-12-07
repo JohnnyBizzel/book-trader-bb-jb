@@ -16,7 +16,9 @@ let store = new Vuex.Store({
     book: null,
     books: [],
     myBooks: [],
-    allBooks: []
+    allBooksForTrade: [], // books not owned by the user
+    tradeInbox: [], // requested
+    tradeOutbox: []  // requesting
   },
   getters: {
     getLoggedInUser: state => {
@@ -36,6 +38,9 @@ let store = new Vuex.Store({
     },
     getMyBooks: state => {
       state.myBooks
+    },
+    getAllBooksForTrade: state => {
+      state.allBooksForTrade
     },
     isAuth () {
       const localStore = JSON.parse(localStorage.getItem('book-trader-bb-jb-token'));
@@ -73,23 +78,36 @@ let store = new Vuex.Store({
     setBook (state, book) {
       state.book = book;
     },
-    setBooks (state, books) {
+    setBooks (state, books) {  // used for showing search results (adding a book)
       state.books = books;
     },
     saveBookInformation (state, book) { // add a new book to my books (save to Firebase)
       let newState = state.myBooks;
-      newState.push(book);
-      console.log(state.myBooks);
+      // remove the userId from the state array of myBooks
+      let bookDetail = book[this.state.userId];
+      newState.push(bookDetail);
       state.myBooks = newState;      
     },
     setMyBooks (state, books) { // get all my books (coming from Firebase)
       state.myBooks = books
+    },
+    setOtherUserBooks (state, books) {
+      state.allBooksForTrade = books
     },
     clearSearchResults (state) {
       state.books = []
     },
     clearMyBooks (state) {
       return state.myBooks = []
+    },
+    tradeRequest (state, payload) {
+      state.tradeOutbox.push(payload)
+    },
+    showMyRequests (state, reqs) {
+      state.tradeOutbox = reqs
+    },
+    getTradesForMyBooks (state) {
+      return state.tradeInbox
     }
   },
   actions: {
@@ -98,7 +116,6 @@ let store = new Vuex.Store({
         .then((res) => {
 
           var userRef = firebase.database().ref("users");
-          // console.log(userRef);
           userRef.push({ uid : res.user.uid,
              username: payload.username,
              email: payload.email,
@@ -119,7 +136,6 @@ let store = new Vuex.Store({
        
     },
     signIn ({commit}, payload) {
-      // console.log('Sign in attempt', payload.email)
       firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
       .then(res => {
 
@@ -168,7 +184,6 @@ let store = new Vuex.Store({
       const apiKey = process.env.VUE_APP_BOOK_READS_API;
       const api = `https://cors-anywhere.herokuapp.com/https://www.goodreads.com/book/show/${bookId}?format=xml&key=${apiKey}`
       axios.get(api).then((response) => {
-        //console.log(response.data)
         parser.parseString(response.data,
           function(err, result) {
               if (err) console.log(err);
@@ -185,8 +200,7 @@ let store = new Vuex.Store({
       const parser = xml2js.Parser({explicitArray: false});
       const apiKey = process.env.VUE_APP_BOOK_READS_API;
       const api = `https://cors-anywhere.herokuapp.com/https://www.goodreads.com/search/index.xml?format=xml&key=${apiKey}&q=${searchTerm}`
-      axios.get(api).then((response) => {
-        
+      axios.get(api).then((response) => {        
         parser.parseString(response.data,
           function(err, result) {
               if (err) console.log(err);
@@ -204,40 +218,32 @@ let store = new Vuex.Store({
             authorName: book.best_book.author.name,
             bookId: book.best_book.id._,
             photoURL: book.best_book.image_url,
+            // smallImageURL: book.best_book.image
           }
       
       fbBookToAdd = nodeName;
-      console.log('adding book in store:' + fbBookToAdd);
       
       if (!user_id) return;
       var bookRef = firebase.database().ref('books');
       bookRef.push(fbBookToAdd).then((snap) => {
-        console.log('saving book - promise')
         commit('saveBookInformation', fbBookToAdd);      
       });
       
     },
     deleteBook({commit, state}, bookId) {
       var booksRef = firebase.database().ref('books');
-      //console.log(booksRef.child(['.key']));
-      
-//       console.log('Deleting:', bookId)
-//       // Create a reference to the books collection
-
-      
+            
       booksRef.once('value')
       .then(function(snapshot) {
         var fbId = "";
         snapshot.forEach(function(childSnapshot) {
             // childSnapshot.remove();
-          console.log(childSnapshot.key);
           var oneBook = childSnapshot.val();
           if (oneBook.hasOwnProperty(state.userId)) {
             // the user's book to delete
             if (oneBook[state.userId].bookId == bookId) { 
               fbId = childSnapshot.key;
               booksRef.child(fbId).remove().then(() => { 
-                console.log(fbId, ' deleted')
                 alert('Your book was deleted')
                 // todo: update state
               })                                            
@@ -248,24 +254,91 @@ let store = new Vuex.Store({
     },
     getMyBooks({commit}) {
       // get all my books available to trade
-      var bookRef = firebase.database().ref('books');
+      const bookRef = firebase.database().ref('books');
       let tempArray = [];
+      const currentUserID = this.state.userId;
       bookRef.once('value')
       .then(function(snapshot) {
-        snapshot.forEach(function(childSnapshot) {
-          
-          tempArray.push(childSnapshot.val())
-          //console.log(tempArray)
+        snapshot.forEach(function(child) {
+          const userId = Object.keys(child.val())[0];
+          if (currentUserID === userId) {
+            const obj = child.val()[userId];
+            tempArray.push(obj);
+          }
         })
         commit('setMyBooks', tempArray)         
       })
       
     },
-    getOtherUserBooks({commit}, userId) {
+    getOtherUserBooks({commit}) {
       // show all available books for trade minus my books
-    },
-    showTrades() {
+      console.log(this.state.tradeOutbox)
+      const bookRef = firebase.database().ref('books');
+      let otherBooks = [];
+      const currentUserId = this.state.userId;
       
+      bookRef.once('value')
+      .then(function(snapshot) {
+        snapshot.forEach(function(child) {
+          const userId = Object.keys(child.val())[0];
+          if (currentUserId !== userId) {
+            let obj = child.val()[userId]
+            obj.ownerId = userId
+            obj.alreadyRequested = true
+            // TODO do a test to find if this book has been requested by this user!
+            // obj.alreadyRequested = t/f
+            otherBooks.push(obj)             
+          }
+        })
+        return commit('setOtherUserBooks', otherBooks)  
+
+      })
+    },
+    showTradeReqsFromUser({commit}) {
+      // get existing trades placed by this UserID not yet actioned (outbox)
+      const userId = this.state.userId;
+      var tradeRef = firebase.database().ref('trades');
+      let tradeArray = [];
+      tradeRef.once('value')
+        .then(function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            const child = childSnapshot.val();
+            if (child.requestorsUserId == userId)
+              tradeArray.push(childSnapshot.val())
+          
+        })
+        commit('showMyRequests', tradeArray)         
+      })
+      
+    },
+    showTradeReqsForUsersBooks() {
+        // get existing trades for books owned by this User (inbox)
+      
+    },
+    makeTradeRequest({commit}, book) {
+      const user_id = this.state.userId;
+      
+      let requestedBook = {
+        //my user id,
+        requestorsUserId : user_id,
+        //book owner user id,
+        bookOwner : book.ownerId,
+        //book ID
+        bookId : book.bookId,
+        //status (accepted, rejected, completed),        
+        accepted: false,
+        rejected: false,
+        dateTimeCompleted: null,
+          //book title
+        bookTitle: book.bookTitle
+      }
+      
+      const tradeRef = firebase.database().ref('trades');
+      
+      
+      tradeRef.push(requestedBook).then((snap) => {
+        commit('tradeRequest', requestedBook)  
+      })
     },
     clearSearch({commit}) {
       // clear search results from state

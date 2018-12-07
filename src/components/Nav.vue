@@ -17,7 +17,8 @@
             <li v-if="auth"><span @click="logout">Logout</span></li>
             <router-link v-if="!auth" to="/login" active-class="active" tag="li">Login</router-link>
             <router-link v-if="!auth" to="/register" active-class="active" tag="li">Register</router-link>
-            <router-link v-if="auth"  to="/profile" active-class="active" tag="li">Profile</router-link>            
+            <router-link v-if="auth"  to="/profile" active-class="active" tag="li">Profile</router-link>
+            <router-link v-if="auth"  to="/trades" active-class="active" tag="li">Trades</router-link>
           </ul>
         </div>
       </div>
