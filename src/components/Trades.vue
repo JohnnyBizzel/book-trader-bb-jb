@@ -9,10 +9,9 @@
       </header>
       
       <div class="flexbox-container">
-          <div class="card" v-for="b in allBooks">        
+          <div class="card brown lighten-5" v-for="b in allBooks">        
             <div class="card-image">
               <img class="fixed-height" v-bind:src="b.photoURL">
-<!--               <span class="card-title black-text">{ b.bookTitle }</span>               -->
               <span v-if="!b.alreadyRequested">
               <a class="btn-floating halfway-fab waves-effect waves-light green">
                 <i @click="reqBook(b)" class="material-icons">send</i>
@@ -20,27 +19,56 @@
               </span>
               <span v-if="b.alreadyRequested">
                 <a class="btn-floating disabled halfway-fab waves-effect waves-light green">
-                  <i class="material-icons">send</i>
+                  <i class="material-icons">check</i>
                 </a>
               </span>
               
             </div>
             <div class="card-content">
-              <p><span v-if="!b.alreadyRequested" class="blue-text text-lighten-2 cursor-pointer left" @click="reqBook(b)">Request book</span></p>
-              <h6 class="activator grey-text text-darken-4">{{ b.bookTitle }}<i class="material-icons right">more_vert</i></h6>
+              <p class="activator grey-text text-darken-4">
+              <span class="size120pct">{{ b.bookTitle }}</span>
+                <br/>
+              </p>
             </div>
+            <div v-if="!b.alreadyRequested" class="card-action brown lighten-2">
+              <a href="#" class="white-text text-lighten-2 cursor-pointer padding-bottom" @click="reqBook(b)">Request book</a>   
+              <hr>
+              <a class="white-text activator" href="#">More Details</a>
+            </div>  
+            <div v-if="b.alreadyRequested" class="card-action brown lighten-2 ">
+              
+              <a class="white-text activator" href="#">More Details</a>
+            </div>  
             <div class="card-reveal">
               <span class="card-title grey-text text-darken-4">{{ b.bookTitle }}<i class="material-icons right">close</i></span>
               <p>by {{ b.authorName }}</p>
               <p>Owner: {{ b.ownerId }}</p>
               <a v-bind:href="'https://www.goodreads.com/book/show/' + b.bookId" target="_blank">More details on Good Reads</a>
-            </div>            
+            </div>   
         </div> 
       </div>  
       
       <div class="container">
-        <h5>My Trades:</h5>
+        <h5>Trade requests (inbox):</h5>
+       <table class="highlight">
+        <thead>
+          <tr>
+            <th>Book Title</th>
+            <th>Requested By</th>
+            <th>Date/Time</th>
+            <th>Accept?</th>
+          </tr>
+        </thead>
 
+        <tbody>
+          <tr v-for="t in tradeRequestsForMe">
+            <td>{{ t.bookTitle }}</td>
+            <td>{{ t.requestor_username }}</td>
+            <td>not complete</td>
+            <td>y / n</td>
+          </tr>
+        </tbody>
+      </table>
       </div>
   </div>
   
@@ -68,27 +96,38 @@
       }
     },
     created() {  
+      // happens once - refresh page does not load!
+      //console.log(ret);
+      
+    },  
+    mounted() {
       this.$store.dispatch('showTradeReqsFromUser')
         .then(this.$store.dispatch('getOtherUserBooks'))
       // TODO get list of trades
       
-    },  
-    mounted() {
 
       this.currentUsername = this.$store.state.loggedInUser;
-      
-
+      this.$nextTick(function () {
+        // Code that will run only after the
+        // entire view has been rendered
+        alert('finished mounting')
+        this.$store.dispatch('showTradeReqsForUsersBooks');
+      })
     },
     methods: {
       reqBook(book) {
-        console.log('sbk', book);
+        console.log('select book - ', book);
         this.$store.dispatch('makeTradeRequest', book)
+        this.$store.dispatch('getOtherUserBooks')
       }
     },
     computed: {
       allBooks() {
         return this.$store.state.allBooksForTrade
         
+      },
+      tradeRequestsForMe() {
+        return this.$store.state.tradeInbox
       }
     }
   }  
@@ -98,6 +137,11 @@
 <style scoped>
   span.cursor-pointer:hover {
     cursor: pointer;
+  }
+  .card-action {
+    position: absolute !important;
+    width: 100%;
+    bottom: 0;
   }
  .card { 
     width: 13em;
@@ -115,5 +159,18 @@
     border: 1px solid silver;
   } i {
     cursor: pointer;
+  }
+  .grey-text.text-darken-4 {
+    text-align: center;
+    margin-bottom: 3em;
+  }
+  h5 {
+    font-weight: 300;
+  }
+  .size120pct {
+    font-size: 120%;
+  }
+  .padding-bottom {
+    padding-bottom: 10px;
   }
 </style>
