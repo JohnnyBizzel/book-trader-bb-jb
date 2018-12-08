@@ -88,6 +88,15 @@ let store = new Vuex.Store({
       newState.push(bookDetail);
       state.myBooks = newState;      
     },
+    removeBook (state, bookId) {
+      let newState = state.myBooks;
+      // newState.filter((b) => { 
+      //   return b.bookId != bookId;
+      // })
+      state.myBooks = newState.filter((b) => { 
+        return b.bookId != bookId;
+      });      
+    },
     setMyBooks (state, books) { // get all my books (coming from Firebase)
       state.myBooks = books
     },
@@ -106,15 +115,20 @@ let store = new Vuex.Store({
     showMyRequests (state, reqs) {
       state.tradeOutbox = reqs
     },
-    getTradesForMyBooks (state) {
-      return state.tradeInbox
-    }
+    showRequestsForMyBooks (state, reqs) {
+      state.tradeInbox = reqs
+    },
+    addRequestForMyBooks(state, trade) {
+      state.tradeInbox.push(trade)
+    }  
   },
   actions: {
+    // ################## user authentication
     register({commit}, payload) {
       firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
         .then((res) => {
 
+          // TODO: handle if this fails?!
           var userRef = firebase.database().ref("users");
           userRef.push({ uid : res.user.uid,
              username: payload.username,
@@ -177,7 +191,7 @@ let store = new Vuex.Store({
       commit('unAuthenticateUser')
       //localStorage.setItem('book-trader-bb-jb-token', null);
     },
-    // API calls
+    // ################### API calls
     getBookById({commit}, bookId) {
       const xml2js = require('xml2js'); // XML to JSON
       const parser = xml2js.Parser({explicitArray: false});
@@ -250,7 +264,9 @@ let store = new Vuex.Store({
             }
           }
         })
+        commit('removeBook', bookId);        
       })
+      
     },
     getMyBooks({commit}) {
       // get all my books available to trade
@@ -292,30 +308,26 @@ let store = new Vuex.Store({
               .then(function(snapshot) {
                 snapshot.forEach(function(childSnapshot) {
                   const child = childSnapshot.val();
-                  //console.log(child);
+
                   if (child.bookOwner !== currentUserId 
                       && child.requestorsUserId === currentUserId) {
                     tradeArray.push(childSnapshot.val())
-                    console.log(obj.bookId);
-                    console.log(child.bookId);
                     if (child.bookId === obj.bookId) {
-                      console.log('Found MATCH');
                       obj.alreadyRequested = true
                     }
                   }
               })
-              console.log(tradeArray)
             })
-            // obj.alreadyRequested = t/f
+            
             otherBooks.push(obj)             
           }
         })
-        console.log(outBox)
 
         return commit('setOtherUserBooks', otherBooks)  
 
       })
     },
+    // ################ TRADES
     showTradeReqsFromUser({commit}) {
       // get existing trades placed by this UserID not yet actioned (outbox)
       const userId = this.state.userId;
@@ -333,8 +345,38 @@ let store = new Vuex.Store({
       })
       
     },
-    showTradeReqsForUsersBooks() {
+    showTradeReqsForUsersBooks({commit}) {
         // get existing trades for books owned by this User (inbox)
+      const userId = this.state.userId;
+      var tradeRef = firebase.database().ref('trades');
+      let tradeArray = [];
+      tradeRef.once('value')
+        .then(function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            let trade = childSnapshot.val();
+            
+            // get the username
+            var ref = firebase.database().ref("users");
+            
+            ref.orderByChild("uid").equalTo(trade.requestorsUserId).on("child_added", function(snap) {
+              console.log(snap.val());
+              trade.requestor_username = snap.val().username || 'blank';
+              console.log('Username set:', trade.requestor_username);
+            });
+            
+            if (trade.bookOwner == userId)
+              tradeArray.push(trade)
+                  
+            
+          })
+            console.log('TRADE ARRAY', tradeArray);
+            commit('showRequestsForMyBooks', tradeArray)                 
+        
+      })
+        .then(() => {
+        console.log('Somneti8hng#');
+        
+      })
       
     },
     makeTradeRequest({commit}, book) {

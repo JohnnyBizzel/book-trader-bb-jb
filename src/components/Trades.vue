@@ -28,11 +28,16 @@
               <p class="activator grey-text text-darken-4">
               <span class="size120pct">{{ b.bookTitle }}</span>
                 <br/>
-                <a href="#" v-if="!b.alreadyRequested" class="blue-text text-lighten-2 cursor-pointer right padding-bottom" @click="reqBook(b)">Request book</a>   
               </p>
             </div>
-            <div class="card-action brown lighten-2 activator">
-              <a class="white-text" href="#">More Details</a>
+            <div v-if="!b.alreadyRequested" class="card-action brown lighten-2">
+              <a href="#" class="white-text text-lighten-2 cursor-pointer padding-bottom" @click="reqBook(b)">Request book</a>   
+              <hr>
+              <a class="white-text activator" href="#">More Details</a>
+            </div>  
+            <div v-if="b.alreadyRequested" class="card-action brown lighten-2 ">
+              
+              <a class="white-text activator" href="#">More Details</a>
             </div>  
             <div class="card-reveal">
               <span class="card-title grey-text text-darken-4">{{ b.bookTitle }}<i class="material-icons right">close</i></span>
@@ -44,8 +49,26 @@
       </div>  
       
       <div class="container">
-        <h5>My Trades:</h5>
+        <h5>Trade requests (inbox):</h5>
+       <table class="highlight">
+        <thead>
+          <tr>
+            <th>Book Title</th>
+            <th>Requested By</th>
+            <th>Date/Time</th>
+            <th>Accept?</th>
+          </tr>
+        </thead>
 
+        <tbody>
+          <tr v-for="t in tradeRequestsForMe">
+            <td>{{ t.bookTitle }}</td>
+            <td>{{ t.requestor_username }}</td>
+            <td>not complete</td>
+            <td>y / n</td>
+          </tr>
+        </tbody>
+      </table>
       </div>
   </div>
   
@@ -73,27 +96,38 @@
       }
     },
     created() {  
+      // happens once - refresh page does not load!
+      //console.log(ret);
+      
+    },  
+    mounted() {
       this.$store.dispatch('showTradeReqsFromUser')
         .then(this.$store.dispatch('getOtherUserBooks'))
       // TODO get list of trades
       
-    },  
-    mounted() {
 
       this.currentUsername = this.$store.state.loggedInUser;
-      
-
+      this.$nextTick(function () {
+        // Code that will run only after the
+        // entire view has been rendered
+        alert('finished mounting')
+        this.$store.dispatch('showTradeReqsForUsersBooks');
+      })
     },
     methods: {
       reqBook(book) {
-        console.log('sbk', book);
+        console.log('select book - ', book);
         this.$store.dispatch('makeTradeRequest', book)
+        this.$store.dispatch('getOtherUserBooks')
       }
     },
     computed: {
       allBooks() {
         return this.$store.state.allBooksForTrade
         
+      },
+      tradeRequestsForMe() {
+        return this.$store.state.tradeInbox
       }
     }
   }  

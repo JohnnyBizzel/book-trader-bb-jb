@@ -37,7 +37,7 @@
                   <img class="left" v-bind:src="mykey.photoURL">
                   <div class="collection-data">
 <!--                     <span class="title"></span>  -->
-                      <p><h6>Author: {{ mykey.bookTitle }}</h6> <br>
+                      <p><h6>Book Title: {{ mykey.bookTitle }}</h6> <br>
                         Book Id: {{ mykey.bookId }} <br>
                         Author name: {{ mykey.authorName }}
                       </p> 
@@ -73,25 +73,15 @@
       }
     },
     created() {
-      this.$store.dispatch('getMyBooks')
+      
     },  
     mounted() {
-
-      // TODO - check if we need these calls:
+      // we need these calls to load the data (eg componendDidMount):
       this.firebaseUser = firebase.auth().currentUser;
       this.userEmail = this.firebaseUser.email;
       this.currentUsername = this.$store.state.loggedInUser;
-      
-      // if (this.firebaseUser != null) {
-      //   this.firebaseUser.providerData.forEach(function (profile) {
-      //     console.log("Sign-in provider: " + profile.providerId);
-      //     console.log("  Provider-specific UID: " + profile.uid);
-      //     console.log("  Name: " + profile.displayName);
-      //     console.log("  Email: " + profile.email);
-      //     console.log("  Photo URL: " + profile.photoURL);
-      //   });
-      // }
-      
+      this.$store.dispatch('getMyBooks')
+
     },
     methods: {
       saveBook(payload) {  // save one book to current User's owned books        
